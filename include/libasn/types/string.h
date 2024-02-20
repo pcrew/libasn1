@@ -1,17 +1,11 @@
 #pragma once
 
+#include <optional>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
-template <typename Type>
-struct explicit_type {
-    Type type;
-
-    template <typename T>
-    explicit constexpr explicit_type(T &&type)
-        : type(std::forward<T>(type)) {}
-
+struct string_type {
     template <typename ValueType>
     auto operator()(ValueType &&value) const {
         return std::forward<ValueType>(value);
@@ -19,10 +13,10 @@ struct explicit_type {
 
     template <typename Reader>
     auto read(Reader &reader) const {
-        return type.read(reader);
+        auto str = reader.read(reader.size());
+        return str ? std::optional(Reader{*str}) : std::nullopt;
     }
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

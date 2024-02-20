@@ -1,7 +1,12 @@
 #pragma once
 
+#include <libasn/tag_class.h>
+
+#include <optional>
+#include <tuple>
+#include <variant>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 template <typename TagNumber, typename Types, TagNumber... tag_numbers>
@@ -127,5 +132,4 @@ struct choice_type {
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstdint>
+#include <limits>
+#include <optional>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 /* TODO: implement */
@@ -62,5 +65,4 @@ private:
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

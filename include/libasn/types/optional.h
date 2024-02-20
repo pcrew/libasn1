@@ -1,7 +1,8 @@
 #pragma once
 
+#include <optional>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 template <typename Type>
@@ -25,5 +26,4 @@ struct optional_type {
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

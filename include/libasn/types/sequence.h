@@ -1,7 +1,9 @@
 #pragma once
 
+#include <optional>
+#include <tuple>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 template <typename... Types>
@@ -34,7 +36,6 @@ private:
                 return decltype(read_helper<i + 1>(reader, std::forward<ValuesType>(values)...,
                                                    std::forward<decltype(*value)>(*value))){};
             }
-
             return read_helper<i + 1>(reader, std::forward<ValuesType>(values)...,
                                       std::forward<decltype(*value)>(*value));
         }
@@ -42,5 +43,4 @@ private:
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

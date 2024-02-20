@@ -1,7 +1,8 @@
 #pragma once
 
+#include <optional>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 struct boolean_type {
     auto operator()(bool value) const { return value; }
@@ -14,5 +15,4 @@ struct boolean_type {
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

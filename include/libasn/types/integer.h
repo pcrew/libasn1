@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstdint>
+#include <limits>
+#include <optional>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 struct integer_type {
@@ -23,6 +26,7 @@ struct integer_type {
         if (!first_byte) {
             return 0;
         }
+
         auto value = static_cast<uintmax_t>(*first_byte);
 
         for (auto s = length - 1; s; --s) {
@@ -38,5 +42,4 @@ struct integer_type {
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

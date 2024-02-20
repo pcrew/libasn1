@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cstdint>
 
 template <typename T>
 auto bytes_to_hex(const T *bytes, std::size_t size) {

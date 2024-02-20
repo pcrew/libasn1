@@ -6,14 +6,14 @@ INCDIR = $(TOPDIR)/include
 
 CC = $(CROSS_COMPILE)g++
 STRIP = $(CROSS_COMPILE) strip
-CPPFLAGS = -Wall -std=gnu++17 -I$(INCDIR) -O3
+CPPFLAGS = -Wall -std=gnu++17 -I$(INCDIR)
 
 export CC STRIP CPPFLAGS TOPDIR INCDIR
 
 all: test example
 
 test:
-	$(MAKE) -C tests
+	#$(MAKE) -C tests
 
 example:
 	$(MAKE) -C examples

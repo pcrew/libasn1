@@ -1,7 +1,9 @@
 #pragma once
 
+#include <optional>
+#include <tuple>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 template <typename Type>
@@ -25,5 +27,4 @@ struct sequence_of_type {
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

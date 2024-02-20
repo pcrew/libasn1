@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string_view>
+#include <optional>
+#include <cstdint>
+
 struct basic_reader {
     using value_type = std::string_view;
 

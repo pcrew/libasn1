@@ -1,11 +1,12 @@
 #pragma once
 
+#include <optional>
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
 struct null_type {
-    constexpr auto operator()(nullptr_t value = nullptr) const { return value; }
+    constexpr auto operator()(std::nullptr_t value = nullptr) const { return value; }
 
     template <typename Reader>
     auto read(Reader &reader) const {
@@ -14,5 +15,4 @@ struct null_type {
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn

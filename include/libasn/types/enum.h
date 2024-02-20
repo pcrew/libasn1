@@ -1,22 +1,25 @@
 #pragma once
 
+#include <optional>
+
+#include "integer.h"
+
 namespace libasn {
-namespace ber {
 namespace internal {
 
-struct string_type {
+template <typename Enum>
+struct enum_type : public integer_type {
     template <typename ValueType>
     auto operator()(ValueType &&value) const {
         return std::forward<ValueType>(value);
     }
 
     template <typename Reader>
-    auto read(Reader &reader) const {
-        auto str = reader.read(reader.size());
-        return str ? std::optional(Reader{*str}) : std::nullopt;
+    std::optional<Enum> read(Reader &reader) const {
+        auto e = integer_type::read(reader);
+        return e ? std::optional(static_cast<Enum>(*e)) : std::nullopt;
     }
 };
 
 }  // namespace internal
-}  // namespace ber
 }  // namespace libasn
