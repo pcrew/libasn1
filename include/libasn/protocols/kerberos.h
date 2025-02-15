@@ -102,11 +102,6 @@ constexpr auto etype_info2 = der::sequence_of(etype_info2_entry);
 
 constexpr auto kerberos_flags = der::bit_string;
 
-constexpr auto encrypted_data = der::sequence(
-    /* etype */ int32.context_specific<0>(),
-    /* kvno */ uint32.context_specific<1>(),
-    /* cipher */ der::octet_string.context_specific<2>());
-
 constexpr auto encryption_key = der::sequence(
     /* keytype */ int32.context_specific<0>(),
     /* keyvalue */ der::octet_string.context_specific<1>());
@@ -129,6 +124,9 @@ constexpr auto ticket = der::sequence(
     /* sname */ principal_name.context_specific<2>(),
     /* enc-part */ encrypted_ticket_data.context_specific<3>());
 #endif
+
+constexpr auto pac_request = der::sequence(
+    /* include-pac */ der::boolean.context_specific<0>());
 
 constexpr auto transited_encoding = der::sequence(
     /* tr-type */ int32.context_specific<0>(),
@@ -160,7 +158,7 @@ constexpr auto kdc_req_body = der::sequence(
     /* etype */ der::sequence_of(uint32).context_specific<8>(),
     /* addresses */ der::optional(host_addresses.context_specific<9>()),
     /* enc-authorization-data */
-    der::optional(encrypted_data.context_specific<10>()),
+    der::optional(details::encrypted_data.context_specific<10>()),
     /* additional-tickets */
     der::optional(der::sequence_of(ticket).context_specific<11>()));  // Должен ли в ticket быть application?
 

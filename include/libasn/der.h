@@ -96,6 +96,11 @@ struct common_type {
             return std::nullopt;
         }
 
+#if 0
+        printf("\n\n\n");
+        hexdump(serde->data(), serde->size(), std::cout);
+        printf("\n\n\n");
+#endif
         auto bytes_reader = Reader{*serde};
         auto value        = _serde.read(bytes_reader);
         if (!value || !bytes_reader.empty()) {
