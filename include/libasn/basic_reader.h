@@ -48,4 +48,3 @@ struct basic_reader {
         string.remove_prefix(need_removed);
     }
 };
-

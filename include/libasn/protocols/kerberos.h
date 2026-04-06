@@ -4,7 +4,6 @@
 #include <libasn/der.h>
 #include <libasn/basic_reader.h>
 
-// TODO: implement der api
 namespace libasn {
 namespace k5 {
 
@@ -38,23 +37,19 @@ constexpr auto sname_string    = der::general_string;
 constexpr auto realm           = kerberos_string;
 
 constexpr auto principal_name = der::sequence(
-    /* name-type */ int32.context_specific<0>(),
-    /* name-string */ der::sequence_of(kerberos_string).context_specific<1>());
+    /* name-type */ der::explicit_context_specific<0>(int32),
+    /* name-string */ der::explicit_context_specific<1>(der::sequence_of(kerberos_string)));
 
 constexpr auto cname = principal_name;
 constexpr auto sname = principal_name;
 
-#if 0
 constexpr auto kerberos_time = der::generalized_time;
-#else
-constexpr auto kerberos_time = der::general_string;
-#endif
 
 namespace details {
 constexpr auto encrypted_data = der::sequence(
-    /* etype */ int32.context_specific<0>(),
-    /* kvno */ der::optional(uint32.context_specific<1>()),
-    /* cipher */ der::octet_string.context_specific<2>());
+    /* etype */ der::explicit_context_specific<0>(int32),
+    /* kvno */ der::optional(der::explicit_context_specific<1>(uint32)),
+    /* cipher */ der::explicit_context_specific<2>(der::octet_string));
 
 #if 0
 constexpr auto encrypted_data_ber = ber::sequence(
@@ -74,150 +69,140 @@ constexpr auto encrypted_krb_kred_data      = details::encrypted_data;
 constexpr auto pa_enc_timestamp             = details::encrypted_data;
 
 constexpr auto host_address = der::sequence(
-    /* addr-type */ int32.context_specific<0>(),
-    /* address */ der::octet_string.context_specific<1>());
+    /* addr-type */ der::explicit_context_specific<0>(int32),
+    /* address */ der::explicit_context_specific<1>(der::octet_string));
 
 constexpr auto host_addresses = der::sequence_of(host_address);
 
 constexpr auto authorization_data = der::sequence_of(der::sequence(
-    /* ad-type */ int32.context_specific<0>(),
-    /* ad-data */ der::octet_string.context_specific<1>()));
+    /* ad-type */ der::explicit_context_specific<0>(int32),
+    /* ad-data */ der::explicit_context_specific<1>(der::octet_string)));
 
 constexpr auto pa_data = der::sequence(
-    /* padata-type */ int32.context_specific<1>(),
-    /* padata-value */ der::octet_string.context_specific<2>());
+    /* padata-type */ der::explicit_context_specific<1>(int32),
+    /* padata-value */ der::explicit_context_specific<2>(der::octet_string));
 
 constexpr auto typed_data_entry = der::sequence(
-    /* data-type */ der::integer.context_specific<1>(),
-    /* data-value */ der::optional(der::octet_string.context_specific<2>()));
+    /* data-type */ der::explicit_context_specific<1>(der::integer),
+    /* data-value */ der::optional(der::explicit_context_specific<2>(der::octet_string)));
 
 constexpr auto typed_data = der::sequence_of(typed_data_entry);
 
 constexpr auto etype_info2_entry = der::sequence(
-    /* etype */ der::integer.context_specific<0>(),
-    /* salt */ der::optional(kerberos_string.context_specific<1>()),
-    /* s2kparams */ der::optional(der::octet_string.context_specific<2>()));
+    /* etype */ der::explicit_context_specific<0>(der::integer),
+    /* salt */ der::optional(der::explicit_context_specific<1>(kerberos_string)),
+    /* s2kparams */ der::optional(der::explicit_context_specific<2>(der::octet_string)));
 
 constexpr auto etype_info2 = der::sequence_of(etype_info2_entry);
 
 constexpr auto kerberos_flags = der::bit_string;
 
 constexpr auto encryption_key = der::sequence(
-    /* keytype */ int32.context_specific<0>(),
-    /* keyvalue */ der::octet_string.context_specific<1>());
+    /* keytype */ der::explicit_context_specific<0>(int32),
+    /* keyvalue */ der::explicit_context_specific<1>(der::octet_string));
 
 constexpr auto checksum = der::sequence(
-    /* cksumtype */ int32.context_specific<0>(),
-    /* checksum */ der::octet_string.context_specific<1>());
+    /* cksumtype */ der::explicit_context_specific<0>(int32),
+    /* checksum */ der::explicit_context_specific<1>(der::octet_string));
 
-#if 0
-constexpr auto ticket = der::sequence(
-                            /* tkt-vno */ der::integer.context_specific<0>(),
-                            /* realm */ realm.context_specific<1>(),
-                            /* sname */ principal_name.context_specific<2>(),
-                            /* enc-part */ encrypted_ticket_data.context_specific<3>())
-                            .application<protocol_op_enum::TICKET>();
-#else
-constexpr auto ticket = der::sequence(
-    /* tkt-vno */ der::integer.context_specific<0>(),
-    /* realm */ realm.context_specific<1>(),
-    /* sname */ principal_name.context_specific<2>(),
-    /* enc-part */ encrypted_ticket_data.context_specific<3>());
-#endif
+/// Внутреннее тело Ticket (SEQUENCE); на проводе обычно обёрнуто в APPLICATION[1].
+constexpr auto ticket_sequence = der::sequence(
+    /* tkt-vno */ der::explicit_context_specific<0>(der::integer),
+    /* realm */ der::explicit_context_specific<1>(realm),
+    /* sname */ der::explicit_context_specific<2>(principal_name),
+    /* enc-part */ der::explicit_context_specific<3>(encrypted_ticket_data));
+
+constexpr auto ticket = der::explicit_application<protocol_op_enum::TICKET>(ticket_sequence);
 
 constexpr auto pac_request = der::sequence(
-    /* include-pac */ der::boolean.context_specific<0>());
+    /* include-pac */ der::explicit_context_specific<0>(der::boolean));
 
 constexpr auto transited_encoding = der::sequence(
-    /* tr-type */ int32.context_specific<0>(),
-    /* contents */ der::octet_string.context_specific<1>());
+    /* tr-type */ der::explicit_context_specific<0>(int32),
+    /* contents */ der::explicit_context_specific<1>(der::octet_string));
 
 constexpr auto enc_ticket_part = der::sequence(
-    /* flags */ kerberos_flags.context_specific<0>(),
-    /* key */ encryption_key.context_specific<1>(),
-    /* crealm */ realm.context_specific<2>(),
-    /* cname */ principal_name.context_specific<3>(),
-    /* transited */ transited_encoding.context_specific<4>(),
-    /* authtime */ kerberos_time.context_specific<5>(),
-    /* starttime */ der::optional(kerberos_time.context_specific<6>()),
-    /* endtime */ kerberos_time.context_specific<7>(),
-    /* renew-till */ der::optional(kerberos_time.context_specific<8>()),
-    /* caddr */ der::optional(host_addresses.context_specific<9>()),
+    /* flags */ der::explicit_context_specific<0>(kerberos_flags),
+    /* key */ der::explicit_context_specific<1>(encryption_key),
+    /* crealm */ der::explicit_context_specific<2>(realm),
+    /* cname */ der::explicit_context_specific<3>(principal_name),
+    /* transited */ der::explicit_context_specific<4>(transited_encoding),
+    /* authtime */ der::explicit_context_specific<5>(kerberos_time),
+    /* starttime */ der::optional(der::explicit_context_specific<6>(kerberos_time)),
+    /* endtime */ der::explicit_context_specific<7>(kerberos_time),
+    /* renew-till */ der::optional(der::explicit_context_specific<8>(kerberos_time)),
+    /* caddr */ der::optional(der::explicit_context_specific<9>(host_addresses)),
     /* authorization-data */
-    der::optional(authorization_data.context_specific<10>()));
+    der::optional(der::explicit_context_specific<10>(authorization_data)));
 
 constexpr auto kdc_req_body = der::sequence(
-    /* kdc-options */ kerberos_flags.context_specific<0>(),
-    /* cname */ der::optional(principal_name.context_specific<1>()),
-    /* realm */ realm.context_specific<2>(),
-    /* sname */ der::optional(principal_name.context_specific<3>()),
-    /* from */ der::optional(kerberos_time.context_specific<4>()),
-    /* till */ der::optional(kerberos_time.context_specific<5>()),
-    /* rtime */ der::optional(kerberos_time.context_specific<6>()),
-    /* nonce */ uint32.context_specific<7>(),
-    /* etype */ der::sequence_of(uint32).context_specific<8>(),
-    /* addresses */ der::optional(host_addresses.context_specific<9>()),
+    /* kdc-options */ der::explicit_context_specific<0>(kerberos_flags),
+    /* cname */ der::optional(der::explicit_context_specific<1>(principal_name)),
+    /* realm */ der::explicit_context_specific<2>(realm),
+    /* sname */ der::optional(der::explicit_context_specific<3>(principal_name)),
+    /* from */ der::optional(der::explicit_context_specific<4>(kerberos_time)),
+    /* till */ der::optional(der::explicit_context_specific<5>(kerberos_time)),
+    /* rtime */ der::optional(der::explicit_context_specific<6>(kerberos_time)),
+    /* nonce */ der::explicit_context_specific<7>(uint32),
+    /* etype */ der::explicit_context_specific<8>(der::sequence_of(uint32)),
+    /* addresses */ der::optional(der::explicit_context_specific<9>(host_addresses)),
     /* enc-authorization-data */
-    der::optional(details::encrypted_data.context_specific<10>()),
+    der::optional(der::explicit_context_specific<10>(details::encrypted_data)),
     /* additional-tickets */
-    der::optional(der::sequence_of(ticket).context_specific<11>()));  // Должен ли в ticket быть application?
+    der::optional(der::explicit_context_specific<11>(der::sequence_of(ticket))));
 
 constexpr auto kdc_req = der::sequence(
-    /* pvno */ der::integer.context_specific<1>(),
-    /* msg-type */ der::integer.context_specific<2>(),
-    /* padata */ der::optional(der::sequence_of(pa_data).context_specific<3>()),
-    /* req-body */ kdc_req_body.context_specific<4>());
+    /* pvno */ der::explicit_context_specific<1>(der::integer),
+    /* msg-type */ der::explicit_context_specific<2>(der::integer),
+    /* padata */ der::optional(der::explicit_context_specific<3>(der::sequence_of(pa_data))),
+    /* req-body */ der::explicit_context_specific<4>(kdc_req_body));
 
 constexpr auto kdc_rep = der::sequence(
-    /* pvno */ der::integer.context_specific<0>(),
-    /* msg-type */ der::integer.context_specific<1>(),
-    /* padata */ der::optional(der::sequence_of(pa_data).context_specific<2>()),
-    /* crealm */ realm.context_specific<3>(),
-    /* cname */ cname.context_specific<4>(),
-    /* ticket */ kerberos_string.context_specific<5>(),  // must be read as kerberos ticket;
-    /* enc-part */ encrypted_kdc_rep_data.context_specific<6>());
+    /* pvno */ der::explicit_context_specific<0>(der::integer),
+    /* msg-type */ der::explicit_context_specific<1>(der::integer),
+    /* padata */ der::optional(der::explicit_context_specific<2>(der::sequence_of(pa_data))),
+    /* crealm */ der::explicit_context_specific<3>(realm),
+    /* cname */ der::explicit_context_specific<4>(cname),
+    /* ticket */ der::explicit_context_specific<5>(ticket),
+    /* enc-part */ der::explicit_context_specific<6>(encrypted_kdc_rep_data));
 
-constexpr auto authentificator = der::sequence(
-                                     /* authentificator-vno */ der::integer.context_specific<0>(),
-                                     /* crealm */ realm.context_specific<1>(),
-                                     /* cname */ principal_name.context_specific<2>(),
-                                     /* cksum */ der::optional(checksum.context_specific<3>()),
-                                     /* cusec */ microseconds.context_specific<4>(),
-                                     /* ctime */ kerberos_time.context_specific<5>(),
-                                     /* subkey */ der::optional(encryption_key.context_specific<6>()),
-                                     /* seq-number */ der::optional(uint32.context_specific<7>()),
-                                     /* authorization-data */ der::optional(authorization_data.context_specific<8>()))
-                                     .application<protocol_op_enum::AUTHENTICATOR>();
+constexpr auto authentificator = der::explicit_application<protocol_op_enum::AUTHENTICATOR>(der::sequence(
+    /* authentificator-vno */ der::explicit_context_specific<0>(der::integer),
+    /* crealm */ der::explicit_context_specific<1>(realm),
+    /* cname */ der::explicit_context_specific<2>(principal_name),
+    /* cksum */ der::optional(der::explicit_context_specific<3>(checksum)),
+    /* cusec */ der::explicit_context_specific<4>(microseconds),
+    /* ctime */ der::explicit_context_specific<5>(kerberos_time),
+    /* subkey */ der::optional(der::explicit_context_specific<6>(encryption_key)),
+    /* seq-number */ der::optional(der::explicit_context_specific<7>(uint32)),
+    /* authorization-data */ der::optional(der::explicit_context_specific<8>(authorization_data))));
 
-constexpr auto as_req  = kdc_req.application<protocol_op_enum::AS_REQ>();
-constexpr auto as_rep  = kdc_rep.application<protocol_op_enum::AS_REP>();
-constexpr auto tgs_req = kdc_req.application<protocol_op_enum::TGS_REQ>();
-constexpr auto tgs_rep = kdc_rep.application<protocol_op_enum::TGS_REP>();
-constexpr auto ap_req  = der::sequence(
-                            /* pvno */ der::integer.context_specific<0>(),
-                            /* msg-type */ der::integer.context_specific<1>(),
-                            /* ap-options */ kerberos_flags.context_specific<2>(),
-                            /* ticket */ ticket.context_specific<3>(),
-                            /* authenticator */ encrypted_authenticator.context_specific<4>())
-                            .application<protocol_op_enum::AP_REQ>();
+constexpr auto as_req  = der::explicit_application<protocol_op_enum::AS_REQ>(kdc_req);
+constexpr auto as_rep  = der::explicit_application<protocol_op_enum::AS_REP>(kdc_rep);
+constexpr auto tgs_req = der::explicit_application<protocol_op_enum::TGS_REQ>(kdc_req);
+constexpr auto tgs_rep = der::explicit_application<protocol_op_enum::TGS_REP>(kdc_rep);
+constexpr auto ap_req  = der::explicit_application<protocol_op_enum::AP_REQ>(der::sequence(
+    /* pvno */ der::explicit_context_specific<0>(der::integer),
+    /* msg-type */ der::explicit_context_specific<1>(der::integer),
+    /* ap-options */ der::explicit_context_specific<2>(kerberos_flags),
+    /* ticket */ der::explicit_context_specific<3>(ticket),
+    /* authenticator */ der::explicit_context_specific<4>(encrypted_authenticator)));
 
-constexpr auto krb_error = der::sequence(
-                               /* pvno */ der::integer.context_specific<0>(),
-                               /* msg-type */ der::integer.context_specific<1>(),
-                               /* ctime */ der::optional(kerberos_time.context_specific<2>()),
-                               /* cusec */ der::optional(microseconds.context_specific<3>()),
-                               /* stime */ kerberos_time.context_specific<4>(),
-                               /* susec */ microseconds.context_specific<5>(),
-                               /* error-code */ der::integer.context_specific<6>(),
-                               /* crealm */ der::optional(realm.context_specific<7>()),
-                               /* cname */ der::optional(cname.context_specific<8>()),
-                               /* realm */ realm.context_specific<9>(),
-                               /* sname */ sname.context_specific<10>(),
-                               /* e-text */ der::optional(kerberos_string.context_specific<11>()),
-                               /* e-data */ der::optional(der::octet_string.context_specific<12>()),
-                               /* e-checksum */ der::optional(checksum.context_specific<13>()))
-                               .application<protocol_op_enum::KRB_ERROR>();
+constexpr auto krb_error = der::explicit_application<protocol_op_enum::KRB_ERROR>(der::sequence(
+    /* pvno */ der::explicit_context_specific<0>(der::integer),
+    /* msg-type */ der::explicit_context_specific<1>(der::integer),
+    /* ctime */ der::optional(der::explicit_context_specific<2>(kerberos_time)),
+    /* cusec */ der::optional(der::explicit_context_specific<3>(microseconds)),
+    /* stime */ der::explicit_context_specific<4>(kerberos_time),
+    /* susec */ der::explicit_context_specific<5>(microseconds),
+    /* error-code */ der::explicit_context_specific<6>(der::integer),
+    /* crealm */ der::optional(der::explicit_context_specific<7>(realm)),
+    /* cname */ der::optional(der::explicit_context_specific<8>(cname)),
+    /* realm */ der::explicit_context_specific<9>(realm),
+    /* sname */ der::explicit_context_specific<10>(sname),
+    /* e-text */ der::optional(der::explicit_context_specific<11>(kerberos_string)),
+    /* e-data */ der::optional(der::explicit_context_specific<12>(der::octet_string)),
+    /* e-checksum */ der::optional(der::explicit_context_specific<13>(checksum))));
 
 }  // namespace k5
 }  // namespace libasn
-

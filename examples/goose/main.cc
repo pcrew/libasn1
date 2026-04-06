@@ -112,7 +112,9 @@ int main() {
         auto string = data->get<libasn::iec61850::goose::data_choice::BIT_STRING>();
         assert(string.view() == "\x03\x00\x00"sv);
     }
-    { assert(all_data.size() == 0); }
+    {
+        assert(all_data.size() == 0);
+    }
 
     return 0;
 }

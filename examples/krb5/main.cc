@@ -155,7 +155,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto ticket = libasn::k5::details::ticket.read(rd);
+        auto ticket = libasn::k5::ticket_sequence.read(rd);
         assert(ticket.has_value());
     }
 
@@ -582,15 +582,11 @@ int main() {
             auto ap_req = libasn::k5::ap_req.read(pa_data_value);
             assert(ap_req.has_value());
 
-            auto [pvno, msg_type, ap_options, ticket, authenticator] = *ap_req;
-            assert(pvno == 5);
-            assert(msg_type == 14);
-            hexdump(ticket.data(), ticket.size(), std::cout);
-
-            auto tkt = libasn::k5::details::ticket.read(ticket);
-            assert(tkt.has_value());
+            auto [ap_pvno, ap_msg_type, ap_options, ticket, enc_auth] = *ap_req;
+            assert(ap_pvno == 5);
+            assert(ap_msg_type == 14);
             {
-                auto [tkt_vno, realm, principal, enc_part] = *tkt;
+                auto [tkt_vno, realm, principal, enc_part] = ticket;
                 assert(tkt_vno == 5);
                 assert(realm.view() == "VUAN.KMA.VN"sv);
             }

@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "libasn/ber.h"
+#include "libasn/der.h"
 #include "libasn/basic_reader.h"
 
 using namespace std::literals;
@@ -90,6 +91,14 @@ int main(int argc, char **argv) {
 
         assert(utc_time.has_value());
         assert(utc_time->view() == "200902132526Z"sv);
+    }
+
+    {
+        auto viewer  = basic_reader{"\x02\x01\x48"sv};
+        auto integer = libasn::der::integer.read(viewer);
+        assert(viewer.size() == 0);
+        assert(integer.has_value());
+        assert(integer == 72);
     }
 
     return 0;

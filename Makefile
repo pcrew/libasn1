@@ -13,7 +13,7 @@ export CC STRIP CPPFLAGS TOPDIR INCDIR
 all: test example
 
 test:
-	#$(MAKE) -C tests
+	$(MAKE) -C tests
 
 example:
 	$(MAKE) -C examples

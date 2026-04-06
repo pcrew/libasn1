@@ -131,7 +131,7 @@ constexpr auto set_of(T &&type) {
 constexpr auto printable_string = type<encoding_enum::PRIMITIVE, 0x13>(libasn::internal::string_type());
 constexpr auto ia5_string       = type<encoding_enum::PRIMITIVE, 0x16>(libasn::internal::string_type());
 constexpr auto utc_time         = type<encoding_enum::PRIMITIVE, 0x17>(libasn::internal::string_type());
-constexpr auto graphic_string   = type<encoding_enum::PRIMITIVE, 0x17>(libasn::internal::string_type());
+constexpr auto graphic_string   = type<encoding_enum::PRIMITIVE, 0x19>(libasn::internal::string_type());
 constexpr auto visible_string   = type<encoding_enum::PRIMITIVE, 0x1A>(libasn::internal::string_type());
 constexpr auto general_string   = type<encoding_enum::PRIMITIVE, 0x1B>(libasn::internal::string_type());
 
