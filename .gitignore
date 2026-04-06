@@ -3,3 +3,4 @@
 !*.cc
 !*.h
 !Makefile
+!*.py

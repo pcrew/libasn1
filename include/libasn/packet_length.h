@@ -8,6 +8,7 @@
 #include <limits>
 #include <cctype>
 
+#include <libasn/compiler.h>
 #include <libasn/tag_class.h>
 #include <libasn/encoding.h>
 
@@ -22,12 +23,11 @@ struct packet_length {
     template <typename Reader>
     static std::optional<packet_length> read(Reader &reader) {
         auto byte = reader.read();
-        if (!byte) {
+        if (unlikely(!byte)) {
             return std::nullopt;
         }
 
-        auto form_len = (*byte & 0x80);
-        if (form_len == 0) {
+        if (likely((*byte & 0x80) == 0)) {
             return packet_length(*byte);
         }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libasn/compiler.h>
+
 #include <cctype>
 #include <cstdint>
 #include <limits>
