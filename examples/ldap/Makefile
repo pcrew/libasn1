@@ -9,6 +9,7 @@ all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) -rdynamic $(OBJECTS) -o $@
+
 clean:
 	@rm -rf $(PROGRAM)
 

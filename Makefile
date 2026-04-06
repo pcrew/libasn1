@@ -18,10 +18,10 @@ fixture:
 tests:
 	$(MAKE) -C tests
 
-example:
+example: fixture
 	$(MAKE) -C examples
 
-bench:
+bench: fixture
 	$(MAKE) -C bench
 
 clean:
