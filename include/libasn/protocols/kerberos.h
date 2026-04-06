@@ -57,7 +57,7 @@ constexpr auto encrypted_data_ber = ber::sequence(
     /* kvno */ ber::integer.context_specific<1>(),
     /* cipher */ ber::octet_string.context_specific<2>());
 #endif
-}  // namespace details
+} // namespace details
 
 constexpr auto encrypted_ticket_data        = details::encrypted_data;
 constexpr auto encrypted_authorization_data = details::encrypted_data;
@@ -204,5 +204,5 @@ constexpr auto krb_error = der::explicit_application<protocol_op_enum::KRB_ERROR
     /* e-data */ der::optional(der::explicit_context_specific<12>(der::octet_string)),
     /* e-checksum */ der::optional(der::explicit_context_specific<13>(checksum))));
 
-}  // namespace k5
-}  // namespace libasn
+} // namespace k5
+} // namespace libasn

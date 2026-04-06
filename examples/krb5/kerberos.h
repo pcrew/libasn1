@@ -8,33 +8,33 @@ namespace libasn {
 namespace k5 {
 
 enum protocol_op_enum {
-    TICKET = 1,
-    AUTHENTICATOR = 2,
-    ENC_TICKET_PART = 3,
-    AS_REQ = 10,
-    AS_REP = 11,
-    TGS_REQ = 12,
-    TGS_REP = 13,
-    AP_REQ = 14,
-    AP_REP = 15,
-    KRB_SAFE = 20,
-    KRB_PRIV = 21,
-    KRB_CRED = 22,
-    ENC_AS_REP_PART = 25,
-    ENC_TGS_REP_PART = 26,
-    ENC_AP_REP_PART = 27,
+    TICKET            = 1,
+    AUTHENTICATOR     = 2,
+    ENC_TICKET_PART   = 3,
+    AS_REQ            = 10,
+    AS_REP            = 11,
+    TGS_REQ           = 12,
+    TGS_REP           = 13,
+    AP_REQ            = 14,
+    AP_REP            = 15,
+    KRB_SAFE          = 20,
+    KRB_PRIV          = 21,
+    KRB_CRED          = 22,
+    ENC_AS_REP_PART   = 25,
+    ENC_TGS_REP_PART  = 26,
+    ENC_AP_REP_PART   = 27,
     ENC_KRB_PRIV_PART = 28,
     ENC_KRB_CRED_PART = 29,
-    KRB_ERROR = 30,
+    KRB_ERROR         = 30,
 };
 
-constexpr auto uint32 = ber::integer;
-constexpr auto int32 = ber::integer;
-constexpr auto microseconds = ber::integer;
+constexpr auto uint32          = ber::integer;
+constexpr auto int32           = ber::integer;
+constexpr auto microseconds    = ber::integer;
 constexpr auto kerberos_string = ber::general_string;
-constexpr auto c_name_string = ber::general_string;
-constexpr auto s_name_string = ber::general_string;
-constexpr auto realm = kerberos_string;
+constexpr auto c_name_string   = ber::general_string;
+constexpr auto s_name_string   = ber::general_string;
+constexpr auto realm           = kerberos_string;
 
 constexpr auto principal_name = ber::sequence(
     /* name-type */ int32.context_specific<0>(),
@@ -79,11 +79,11 @@ constexpr auto checksum = ber::sequence(
     /* checksum */ ber::octet_string.context_specific<1>());
 
 constexpr auto ticket = ber::sequence(
-			    /* tkt-vno */ ber::integer.context_specific<0>(),
-			    /* realm */ realm.context_specific<1>(),
-			    /* sname */ principal_name.context_specific<2>(),
-			    /* enc-part */ encrypted_data.context_specific<3>())
-			    .application<protocol_op_enum::TICKET>();
+                            /* tkt-vno */ ber::integer.context_specific<0>(),
+                            /* realm */ realm.context_specific<1>(),
+                            /* sname */ principal_name.context_specific<2>(),
+                            /* enc-part */ encrypted_data.context_specific<3>())
+                            .application<protocol_op_enum::TICKET>();
 
 constexpr auto transited_encoding = ber::sequence(
     /* tr-type */ int32.context_specific<0>(),
@@ -127,6 +127,5 @@ constexpr auto kdc_req = ber::sequence(
 
 constexpr auto as_req = kdc_req.application<protocol_op_enum::AS_REQ>();
 
-}  // namespace k5
-}  // namespace libasn
-
+} // namespace k5
+} // namespace libasn

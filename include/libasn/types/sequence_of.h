@@ -26,5 +26,5 @@ struct sequence_of_type {
     }
 };
 
-}  // namespace internal
-}  // namespace libasn
+} // namespace internal
+} // namespace libasn

@@ -15,4 +15,4 @@ enum encoding_rules_enum {
     DER = 1,
 };
 
-}  // namespace libasn
+} // namespace libasn

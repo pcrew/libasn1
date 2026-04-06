@@ -56,7 +56,7 @@ constexpr auto sav_pdu = ber::sequence(
 
 constexpr auto sample_values = ber::choice<application_choice>().with(sav_pdu);
 
-}  // namespace sv
+} // namespace sv
 
 namespace goose {
 
@@ -136,7 +136,7 @@ constexpr static auto pdu = ber::sequence(
                                 /* numDatSetEntries */ ber::sequence_of(data).context_specific<0x0b>()).application<1>();
 // clang-format on
 
-}  // namespace goose
+} // namespace goose
 
-}  // namespace iec61850
-}  // namespace libasn
+} // namespace iec61850
+} // namespace libasn

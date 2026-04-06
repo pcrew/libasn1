@@ -53,9 +53,9 @@ struct dynamic_identifier {
     }
 
 private:
-    encoding_enum _encoding;
+    encoding_enum  _encoding;
     tag_class_enum _tag_class;
-    TagNumber _tag_number;
+    TagNumber      _tag_number;
 };
 
 template <encoding_enum encoding, tag_class_enum tag_class, auto tag_number,
@@ -74,7 +74,7 @@ struct static_identifier {
     template <typename Reader>
     static auto read(Reader &reader) {
         constexpr auto expected = static_identifier{};
-        auto actual             = decltype(dynamic)::read(reader);
+        auto           actual   = decltype(dynamic)::read(reader);
 
         return actual && (expected == *actual) ? std::optional(expected) : std::nullopt;
     }
@@ -87,4 +87,4 @@ struct static_identifier {
     bool operator!=(decltype(dynamic) const &other) const { return !(*this == other); }
 };
 
-}  // namespace libasn
+} // namespace libasn

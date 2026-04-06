@@ -52,17 +52,17 @@ private:
     template <typename Reader>
     auto decode_special_value(Reader &reader, uint8_t first_byte) {
         switch (first_byte) {
-            case 0x40:
-                return std::numeric_limits<double>::infinity();
-            case 0x41:
-                return -std::numeric_limits<double>::infinity();
-            case 0x42:
-                return std::numeric_limits<double>::quiet_NaN();
-            case 0x43:
-                return -0.0;
+        case 0x40:
+            return std::numeric_limits<double>::infinity();
+        case 0x41:
+            return -std::numeric_limits<double>::infinity();
+        case 0x42:
+            return std::numeric_limits<double>::quiet_NaN();
+        case 0x43:
+            return -0.0;
         }
     }
 };
 
-}  // namespace internal
-}  // namespace libasn
+} // namespace internal
+} // namespace libasn

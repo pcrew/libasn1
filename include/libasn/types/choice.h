@@ -19,7 +19,7 @@ struct choice_type {
     template <typename T>
     constexpr auto with(T &&type) {
         constexpr auto tag_number = decltype(type._identifier)::dynamic.tag_number();
-        auto types                = std::tuple_cat(this->types, std::tuple(type));
+        auto           types      = std::tuple_cat(this->types, std::tuple(type));
 
         return choice_type<TagNumber, decltype(types), tag_numbers..., tag_number>(std::move(types));
     }
@@ -65,7 +65,7 @@ struct choice_type {
     struct Read {
         using Variant = typename std::variant<Values...>;
         TagNumber tag_number;
-        Variant value;
+        Variant   value;
 
         template <size_t i, typename ValueType>
         static auto indexed(ValueType &&value) {
@@ -131,5 +131,5 @@ struct choice_type {
     }
 };
 
-}  // namespace internal
-}  // namespace libasn
+} // namespace internal
+} // namespace libasn

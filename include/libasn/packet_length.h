@@ -60,4 +60,4 @@ struct packet_length {
     }
 };
 
-}  // namespace libasn
+} // namespace libasn

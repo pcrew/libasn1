@@ -53,9 +53,9 @@ struct dynamic_identifier {
     }
 
 private:
-    encoding_enum _encoding;
+    encoding_enum  _encoding;
     tag_class_enum _tag_class;
-    TagNumber _tag_number;
+    TagNumber      _tag_number;
 };
 
 template <encoding_enum encoding, tag_class_enum tag_class, auto tag_number>
@@ -70,7 +70,7 @@ struct static_identifier {
     template <typename Reader>
     static auto read(Reader &reader) {
         constexpr auto expected = static_identifier{};
-        auto actual             = decltype(dynamic)::read(reader);
+        auto           actual   = decltype(dynamic)::read(reader);
 
         return actual && (expected == *actual) ? std::optional(expected) : std::nullopt;
     }
@@ -134,7 +134,7 @@ struct packet_length {
 template <typename Identifier, typename Serde>
 struct common_type {
     Identifier _identifier;
-    Serde _serde;
+    Serde      _serde;
 
     explicit constexpr common_type(Identifier identifier, Serde serde)
         : _identifier(std::forward<Identifier>(identifier))
@@ -249,5 +249,5 @@ constexpr auto graphic_string   = type<encoding_enum::PRIMITIVE, 0x17>(libasn::b
 constexpr auto visible_string   = type<encoding_enum::PRIMITIVE, 0x1A>(libasn::ber::internal::string_type());
 constexpr auto general_string   = type<encoding_enum::PRIMITIVE, 0x1B>(libasn::ber::internal::string_type());
 
-}  // namespace internal
-}  // namespace libasn
+} // namespace internal
+} // namespace libasn

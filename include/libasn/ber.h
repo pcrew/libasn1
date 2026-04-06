@@ -32,7 +32,7 @@ namespace ber {
 template <typename Identifier, typename Serde>
 struct common_type {
     Identifier _identifier;
-    Serde _serde;
+    Serde      _serde;
 
     explicit constexpr common_type(Identifier identifier, Serde serde)
         : _identifier(std::forward<Identifier>(identifier))
@@ -135,5 +135,5 @@ constexpr auto graphic_string   = type<encoding_enum::PRIMITIVE, 0x19>(libasn::i
 constexpr auto visible_string   = type<encoding_enum::PRIMITIVE, 0x1A>(libasn::internal::string_type());
 constexpr auto general_string   = type<encoding_enum::PRIMITIVE, 0x1B>(libasn::internal::string_type());
 
-}  // namespace ber
-}  // namespace libasn
+} // namespace ber
+} // namespace libasn

@@ -34,16 +34,16 @@ inline auto hexdump(const void *data, std::size_t size, std::basic_ostream<E, T>
             for (const auto *next = line; next != end && next != line + width; next++) {
                 auto ch = *next;
                 switch (pass) {
-                    case 1:
-                        stream << (ch < 32 ? '.' : ch);
-                        break;
-                    case 2:
-                        if (next != line) stream << " ";
+                case 1:
+                    stream << (ch < 32 ? '.' : ch);
+                    break;
+                case 2:
+                    if (next != line) stream << " ";
 
-                        stream.width(2);
-                        stream.fill('0');
-                        stream << std::hex << std::uppercase << static_cast<int>(static_cast<uint8_t>(ch));
-                        break;
+                    stream.width(2);
+                    stream.fill('0');
+                    stream << std::hex << std::uppercase << static_cast<int>(static_cast<uint8_t>(ch));
+                    break;
                 }
             }
 

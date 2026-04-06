@@ -70,5 +70,5 @@ constexpr auto rtse_apdus = ber::choice<rtse_apdus_choice>()
                                 .with(rttp_apdu)
                                 .with(rtab_apdu);
 
-}  // namespace rtse
-}  // namespace libasn
+} // namespace rtse
+} // namespace libasn

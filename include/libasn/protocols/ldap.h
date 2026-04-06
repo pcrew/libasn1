@@ -259,5 +259,5 @@ constexpr auto message = ber::sequence(message_id,
                                            .with(search_result_done)
                                            .with(search_result_reference),
                                        ber::optional(controls));
-}  // namespace ldap
-}  // namespace libasn
+} // namespace ldap
+} // namespace libasn

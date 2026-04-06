@@ -44,7 +44,7 @@ int main() {
     assert(gocb_ref.view() == "GEDeviceF650/LLN0$GO$gcb01"sv);
     assert(time_allowed_live == 40000);
     assert(dat_set.view() == "GEDeviceF650/LLN0$GOOSE1"sv);
-    assert(go_id && go_id->view() == "F650_GOOSE1"sv);  // go_id is std::oprional<reader>
+    assert(go_id && go_id->view() == "F650_GOOSE1"sv); // go_id is std::oprional<reader>
     assert(t.view() == "\x38\x6e\xbb\xf3\x42\x17\x28\x0a"sv);
     assert(st_num == 1);
     assert(sq_num == 10);

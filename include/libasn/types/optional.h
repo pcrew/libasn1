@@ -25,5 +25,5 @@ struct optional_type {
     }
 };
 
-}  // namespace internal
-}  // namespace libasn
+} // namespace internal
+} // namespace libasn
