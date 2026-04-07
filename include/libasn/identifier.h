@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 #include <string_view>
+#include <type_traits>
 #include <tuple>
 #include <variant>
 #include <limits>
@@ -13,6 +14,20 @@
 #include <libasn/tag_class.h>
 
 namespace libasn {
+
+namespace detail {
+
+template <typename T>
+constexpr std::uint64_t tag_number_as_u64(T const &v) {
+    using U = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_enum_v<U>) {
+        return static_cast<std::uint64_t>(static_cast<std::underlying_type_t<U>>(v));
+    } else {
+        return static_cast<std::uint64_t>(v);
+    }
+}
+
+} // namespace detail
 
 template <typename TagNumber>
 struct dynamic_identifier {
@@ -86,5 +101,16 @@ struct static_identifier {
     }
     bool operator!=(decltype(dynamic) const &other) const { return !(*this == other); }
 };
+
+template <encoding_enum enc, tag_class_enum tc, auto tn, auto er>
+bool operator==(const static_identifier<enc, tc, tn, er> &s, const dynamic_identifier<int> &w) {
+    return s.dynamic.encoding() == w.encoding() && s.dynamic.tag_class() == w.tag_class() &&
+           detail::tag_number_as_u64(s.dynamic.tag_number()) == detail::tag_number_as_u64(w.tag_number());
+}
+
+template <encoding_enum enc, tag_class_enum tc, auto tn, auto er>
+bool operator==(const dynamic_identifier<int> &w, const static_identifier<enc, tc, tn, er> &s) {
+    return s == w;
+}
 
 } // namespace libasn
