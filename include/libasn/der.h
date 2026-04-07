@@ -61,12 +61,14 @@ struct common_type {
 
     template <typename Reader>
     auto read(Reader &reader) const -> decltype(_serde.read(std::declval<Reader &>())) {
-        auto identifier = Identifier::read(reader);
+        auto const st         = reader;
+        auto       identifier = Identifier::read(reader);
         if (!identifier) {
             return std::nullopt;
         }
 
         if (this->_identifier != *identifier) {
+            reader = std::forward<decltype(st)>(st);
             return std::nullopt;
         }
         auto length = packet_length::read(reader);
