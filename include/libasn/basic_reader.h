@@ -9,10 +9,10 @@ struct basic_reader {
 
     value_type string;
 
-    auto view() { return string; }
-    auto data() { return string.data(); }
-    auto size() { return string.size(); }
-    auto empty() { return string.empty(); }
+    auto view() const { return string; }
+    auto data() const { return string.data(); }
+    auto size() const { return string.size(); }
+    auto empty() const { return string.empty(); }
 
     std::optional<uint8_t> view_byte() {
         if (empty()) {
