@@ -21,7 +21,7 @@ struct optional_type {
         if (!res) {
             reader = std::forward<decltype(st)>(st);
         }
-        return std::optional<decltype(res)>(std::forward<decltype(res)>(res));
+        return std::make_optional(res);
     }
 };
 

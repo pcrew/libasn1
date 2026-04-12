@@ -9,8 +9,11 @@ struct null_type {
     constexpr auto operator()(std::nullptr_t value = nullptr) const { return value; }
 
     template <typename Reader>
-    auto read(Reader &reader) const {
-        return std::optional(nullptr);
+    std::optional<std::nullptr_t> read(Reader &reader) const {
+        if (!reader.empty()) {
+            return std::nullopt;
+        }
+        return nullptr;
     }
 };
 

@@ -12,3 +12,4 @@
 #include <libasn/protocols/iec61850.h>
 #include <libasn/protocols/kerberos.h>
 #include <libasn/protocols/ldap.h>
+#include <libasn/protocols/x509.h>

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <libasn/tag_class.h>
+#include <libasn/identifier.h>
+#include <libasn/packet_length.h>
 
 #include <optional>
 #include <tuple>
@@ -21,7 +23,8 @@ struct choice_type {
         constexpr auto tag_number = decltype(type._identifier)::dynamic.tag_number();
         auto           types      = std::tuple_cat(this->types, std::tuple(type));
 
-        return choice_type<TagNumber, decltype(types), tag_numbers..., tag_number>(std::move(types));
+        return choice_type<TagNumber, decltype(types), tag_numbers..., static_cast<TagNumber>(tag_number)>(
+            std::move(types));
     }
 
     template <TagNumber tag_number, typename T>
@@ -109,8 +112,9 @@ struct choice_type {
 
     template <typename Reader>
     auto read(Reader &reader) const
-        -> decltype(read_choices<0>(reader, *dynamic_identifier<TagNumber>::read(std::declval<Reader &>()))) {
-        auto identifier = dynamic_identifier<TagNumber>::read(reader);
+        -> decltype(read_choices<0>(reader, *dynamic_identifier<int>::read(std::declval<Reader &>()))) {
+
+        auto identifier = dynamic_identifier<int>::read(reader);
         if (!identifier) {
             return std::nullopt;
         }
@@ -127,7 +131,7 @@ struct choice_type {
 
         auto bytes_reader = Reader{*bytes};
 
-        return read_choices<0>(bytes_reader, std::forward<decltype(*identifier)>(*identifier));
+        return read_choices<0>(bytes_reader, *identifier);
     }
 };
 

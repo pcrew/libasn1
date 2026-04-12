@@ -76,9 +76,6 @@ private:
 template <encoding_enum encoding, tag_class_enum tag_class, auto tag_number,
           auto encoding_rule = encoding_rules_enum::BER>
 struct static_identifier {
-    constexpr static auto IS_BER{encoding_rule == encoding_rules_enum::BER};
-    constexpr static auto IS_DER{encoding_rule == encoding_rules_enum::DER};
-
     constexpr static dynamic_identifier dynamic{encoding, tag_class, tag_number};
 
     template <tag_class_enum tag_class_new, auto tag_number_new, auto encoding_rule_new = encoding_rules_enum::BER>
