@@ -142,6 +142,7 @@ struct tlv_codec {
     static constexpr auto bit_string        = type<encoding_enum::PRIMITIVE, 0x03>(libasn::internal::string_type());
     static constexpr auto octet_string      = type<encoding_enum::PRIMITIVE, 0x04>(libasn::internal::string_type());
     static constexpr auto null              = type<encoding_enum::PRIMITIVE, 0x05>(libasn::internal::null_type());
+    static constexpr auto real              = type<encoding_enum::PRIMITIVE, 0x09>(libasn::internal::real_type());
     static constexpr auto object_identifier = type<encoding_enum::PRIMITIVE, 0x06>(libasn::internal::string_type());
 
     template <typename Enum>

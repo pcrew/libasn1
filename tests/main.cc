@@ -1,5 +1,6 @@
 
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <limits>
 
@@ -102,6 +103,170 @@ void test_ber_integers() {
         assert(viewer.size() == 0);
         assert(integer.has_value());
         assert(integer == std::numeric_limits<intmax_t>::max());
+    }
+}
+
+void test_ber_real() {
+    {
+        auto viewer = basic_reader{"\x09\x00"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 0.0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x40"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(std::isinf(*r) && *r > 0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x41"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(std::isinf(*r) && *r < 0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x42"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(std::isnan(*r));
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x43"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 0.0);
+        assert(std::signbit(*r));
+    }
+    {
+        auto viewer = basic_reader{"\x09\x02\x40\x00"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x44"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
+    }
+    {
+        auto viewer = basic_reader{"\x09\x04\x01\x31\x2E\x35"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 1.5);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x05\x01\x32\x2C\x35\x30"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 2.5);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x06\x01\x2D\x31\x2E\x32\x35"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == -1.25);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x02\x01\x30"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 0.0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x00"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
+    }
+    {
+        auto viewer = basic_reader{"\x09\x04\x01\x58\x59\x5A"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
+    }
+    {
+        auto viewer = basic_reader{"\x09\x03\x80\xF9\x80"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 1.0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x03\x80\xFF\x03"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 1.5);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x03\xC0\xF9\x80"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == -1.0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x04\x81\xFF\xFF\x03"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value());
+        assert(*r == 1.5);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x03\xB0\xF9\x80"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
+    }
+    {
+        auto viewer = basic_reader{"\x09\x02\x83\x00"sv};
+        auto r      = libasn::ber::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
+    }
+}
+
+void test_der_real() {
+    {
+        auto viewer = basic_reader{"\x09\x00"sv};
+        auto r      = libasn::der::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value() && *r == 0.0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x40"sv};
+        auto r      = libasn::der::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value() && std::isinf(*r) && *r > 0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x04\x01\x31\x2E\x35"sv};
+        auto r      = libasn::der::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value() && *r == 1.5);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x03\x80\xF9\x80"sv};
+        auto r      = libasn::der::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(r.has_value() && *r == 1.0);
+    }
+    {
+        auto viewer = basic_reader{"\x09\x01\x44"sv};
+        auto r      = libasn::der::real.read(viewer);
+        assert(viewer.size() == 0);
+        assert(!r.has_value());
     }
 }
 
@@ -256,6 +421,8 @@ int main() {
     test_ber_octet_utf_printable();
     test_ber_boolean_and_null();
     test_ber_integers();
+    test_ber_real();
+    test_der_real();
     test_ber_utc_time();
     test_ber_sequence();
     test_ber_enumerated();

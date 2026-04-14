@@ -42,6 +42,7 @@ constexpr auto integer           = codec::integer;
 constexpr auto bit_string        = codec::bit_string;
 constexpr auto octet_string      = codec::octet_string;
 constexpr auto null              = codec::null;
+constexpr auto real              = codec::real;
 constexpr auto object_identifier = codec::object_identifier;
 constexpr auto utf_string        = codec::utf_string;
 constexpr auto printable_string  = codec::printable_string;
