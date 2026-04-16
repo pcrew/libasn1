@@ -2,6 +2,7 @@
 
 #include <libasn/compiler.h>
 
+#include <libasn/ber/detail/ber_object_identifier_body.h>
 #include <libasn/tlv.h>
 
 namespace libasn {
