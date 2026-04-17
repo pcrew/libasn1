@@ -1,0 +1,5 @@
+{
+  "namespace_default": "ldap",
+  "wrap_self_choice_in_explicit": true,
+  "substring_choice_use_assertion_value": true
+}

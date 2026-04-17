@@ -4,3 +4,5 @@
 !*.h
 !Makefile
 !*.py
+include/libasn/protocols/*
+!*.json

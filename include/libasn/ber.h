@@ -59,6 +59,13 @@ constexpr auto sequence(ElementsType &&...elements) {
     return codec::sequence(std::forward<ElementsType>(elements)...);
 }
 
+/** Component encodings only (no UNIVERSAL SEQUENCE 0x30 wrapper). Use inside tagged types, e.g.
+ * ``[APPLICATION n] IMPLICIT SEQUENCE { ... }`` where the APPLICATION TLV carries the fields directly. */
+template <typename... ElementsType>
+constexpr auto sequence_contents(ElementsType &&...elements) {
+    return libasn::internal::sequence_type<std::decay_t<ElementsType>...>(std::forward<ElementsType>(elements)...);
+}
+
 template <typename T>
 constexpr auto sequence_of(T &&t) {
     return codec::sequence_of(std::forward<T>(t));

@@ -1,0 +1,6 @@
+{
+  "namespace_default": "kerberos",
+  "backend": "der",
+  "context_specific_prefer_explicit": true,
+  "application_prefer_explicit": true
+}

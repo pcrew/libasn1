@@ -9,6 +9,11 @@ all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) -rdynamic $(OBJECTS) -o $@
+
+run_example: $(PROGRAM)
+	@echo "== SV == "
+	@./$(PROGRAM)
+
 clean:
 	@rm -rf $(PROGRAM)
 

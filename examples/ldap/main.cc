@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "libasn/basic_reader.h"
-#include "libasn/protocols/ldap.h"
+#include <libasn/protocols/ldap/ldap.h>
 
 using namespace std::literals;
 
@@ -52,7 +52,7 @@ static bool read_file(char const *path, std::vector<std::uint8_t> &out) {
 }
 
 int demo_large_search_result(char const *path) {
-    using libasn::ldap::protocol_op_enum;
+    constexpr int k_search_result_entry = 4;
 
     std::vector<std::uint8_t> bytes;
     if (!read_file(path, bytes)) {
@@ -62,78 +62,70 @@ int demo_large_search_result(char const *path) {
 
     std::string_view sv{reinterpret_cast<char const *>(bytes.data()), bytes.size()};
     basic_reader     rd{sv};
-    auto             msg = libasn::ldap::message.read(rd);
+    auto             msg = libasn::ldap::ldap_message.read(rd);
     if (!msg.has_value() || !rd.empty()) {
         std::cerr << "Failed to parse LDAPMessage" << std::endl;
         return 1;
     }
 
     auto [message_id, command, controls] = *msg;
-    std::cout << "LDAP messageID=" << message_id << ", controls=" << (controls.has_value() ? "yes" : "no") << std::endl;
-
-    if (command.tag_number != protocol_op_enum::SEARCH_RESULT_ENTRY) {
+    if (command.tag_number != k_search_result_entry) {
         std::cerr << "Expected SearchResultEntry" << std::endl;
         return 1;
     }
 
-    auto [dn, attrs] = command.get<protocol_op_enum::SEARCH_RESULT_ENTRY>();
-    std::cout << "SearchResultEntry DN (" << dn.view().size() << " bytes): " << dn.view() << std::endl;
+    auto [dn, attrs] = command.get<k_search_result_entry>();
 
-    int          count = 0;
+    int            count = 0;
+    constexpr auto partial_attribute =
+        libasn::ber::sequence(libasn::ldap::attribute_description, libasn::ber::set_of(libasn::ldap::attribute_value));
+
     basic_reader ar{attrs.view()};
     while (!ar.empty()) {
-        auto pa = libasn::ldap::partial_attribute.read(ar);
+        auto pa = partial_attribute.read(ar);
         if (!pa.has_value()) {
             std::cerr << "partial_attribute at index " << count << std::endl;
             return 1;
         }
         auto [desc, vals] = *pa;
-        if (count < 3) {
-            std::cout << "  attr[" << count << "] type=" << desc.view() << std::endl;
-        }
         basic_reader vr{vals.view()};
-        int          v = 0;
         while (!vr.empty()) {
             auto o = libasn::ber::octet_string.read(vr);
             if (!o.has_value()) {
                 return 1;
             }
-            if (count < 3 && v == 0) {
-                std::cout << "    value[0] len=" << o->view().size() << std::endl;
-            }
-            v++;
         }
         count++;
     }
-    std::cout << "PartialAttribute count: " << count << " (PDU " << bytes.size() << " bytes)" << std::endl;
     return 0;
 }
 
 int demo_embedded_search_request() {
+    constexpr int k_search_request = 3;
+
     auto rd = basic_reader{
         std::string_view{reinterpret_cast<char const *>(packet_bytes), std::size(packet_bytes)}
     };
 
-    auto msg = libasn::ldap::message.read(rd);
+    auto msg = libasn::ldap::ldap_message.read(rd);
     assert(msg.has_value());
 
     auto [message_id, command, optional] = *msg;
     assert(message_id == 1);
-    assert(command.tag_number == libasn::ldap::protocol_op_enum::SEARCH_REQUEST);
+    assert(command.tag_number == k_search_request);
     assert(!optional.has_value());
 
-    auto [p1, p2, p3, p4, p5, p6, p7, p8] = command.get<libasn::ldap::protocol_op_enum::SEARCH_REQUEST>();
+    auto [p1, p2, p3, p4, p5, p6, p7, p8] = command.get<k_search_request>();
     (void)p7;
     (void)p8;
 
     assert(p1.view() == ""sv);
-    assert(p2 == libasn::ldap::search_request_scope_enum::WHOLE_SUBTREE);
-    assert(p3 == libasn::ldap::search_request_deref_aliases_enum::NEVER_DEREF_ALIASES);
+    assert(p2 == libasn::ldap::scope_enum::WHOLE_SUBTREE);
+    assert(p3 == libasn::ldap::deref_aliases_enum::NEVER_DEREF_ALIASES);
     assert(p4 == 0);
     assert(p5 == 0);
     assert(p6 == false);
 
-    std::cout << "Embedded example: SearchRequest parsed (messageID=" << message_id << ")." << std::endl;
     return 0;
 }
 

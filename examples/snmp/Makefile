@@ -10,9 +10,8 @@ all: $(PROGRAM)
 $(PROGRAM): $(OBJECTS)
 	$(CC) -rdynamic $(OBJECTS) -o $@
 
-
 run_example: $(PROGRAM)
-	@echo "== LDAP == "
+	@echo "== SNMP == "
 	@./$(PROGRAM)
 
 clean:

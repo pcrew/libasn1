@@ -1,0 +1,244 @@
+-- SNMP ASN.1 for libasn code generation
+--
+-- PDU / VarBind / ObjectSyntax: Internet Standard RFC 3416 (obsoletes RFC 1905).
+--   https://datatracker.ietf.org/doc/html/rfc3416
+-- SNMPv1 community message wrapper: RFC 1157 (Message), plus local extensions
+--   (SNMPv3, Messagev2u, SMUX) retained from the previous module.
+--
+-- Note: RFC 3416 shows the VarBind second component as an anonymous CHOICE; many
+-- ASN.1 tools require a component name.  The field ``data`` is added — on the wire
+-- it is still the second SEQUENCE element (tag/length identical to RFC 3416).
+
+RFC1157-SNMP DEFINITIONS ::= BEGIN
+
+NotificationName ::= OBJECT IDENTIFIER
+EnterpriseOID    ::= OBJECT IDENTIFIER
+
+-- RFC 3416 §3 — SMIv2 application types used by ObjectSyntax / traps
+IpAddress   ::= [APPLICATION 0] IMPLICIT OCTET STRING (SIZE (4))
+NetworkAddress ::= IpAddress
+Counter32   ::= [APPLICATION 1] IMPLICIT INTEGER (0..4294967295)
+Unsigned32  ::= [APPLICATION 2] IMPLICIT INTEGER (0..4294967295)
+Gauge32     ::= Unsigned32
+TimeTicks   ::= [APPLICATION 3] IMPLICIT INTEGER (0..4294967295)
+Opaque      ::= [APPLICATION 4] IMPLICIT OCTET STRING
+Counter64   ::= [APPLICATION 6] IMPLICIT INTEGER (0..18446744073709551615)
+
+Integer32   ::= INTEGER (-2147483648..2147483647)
+ObjectName  ::= OBJECT IDENTIFIER
+
+-- RFC 3416 §3 — value of a variable (VarBind.value / ObjectSyntax)
+ObjectSyntax ::= CHOICE {
+    simple           SimpleSyntax,
+    application-wide ApplicationSyntax
+}
+
+SimpleSyntax ::= CHOICE {
+    integer-value   INTEGER (-2147483648..2147483647),
+    string-value    OCTET STRING (SIZE (0..65535)),
+    objectID-value  OBJECT IDENTIFIER
+}
+
+ApplicationSyntax ::= CHOICE {
+    ipAddress-value        IpAddress,
+    counter-value          Counter32,
+    timeticks-value        TimeTicks,
+    arbitrary-value        Opaque,
+    big-counter-value      Counter64,
+    unsigned-integer-value Unsigned32
+}
+
+-- RFC 1157 / SNMPv2c community message (v2c uses the same wrapper; version field distinguishes)
+Message ::= SEQUENCE {
+    version   Version,
+    community OCTET STRING,
+    data      PDUs
+}
+
+Version ::= INTEGER { version-1(0), v2c(1), v2u(2), snmpv3(3) }
+
+Messagev2u ::= SEQUENCE {
+    version    Version,
+    parameters OCTET STRING,
+    datav2u CHOICE {
+        plaintext PDUs,
+        encrypted OCTET STRING
+    }
+}
+
+UsmSecurityParameters ::= SEQUENCE {
+    msgAuthoritativeEngineID     SnmpEngineID,
+    msgAuthoritativeEngineBoots  INTEGER (0..2147483647),
+    msgAuthoritativeEngineTime   INTEGER (0..2147483647),
+    msgUserName                  OCTET STRING (SIZE(1..32)),
+    msgAuthenticationParameters  OCTET STRING,
+    msgPrivacyParameters         OCTET STRING
+}
+
+SnmpEngineID ::= OCTET STRING
+
+SNMPv3Message ::= SEQUENCE {
+    msgVersion            Version,
+    msgGlobalData         HeaderData,
+    msgSecurityParameters OCTET STRING,
+    msgData               ScopedPduData
+}
+
+HeaderData ::= SEQUENCE {
+    msgID            INTEGER (0..2147483647),
+    msgMaxSize       INTEGER (484..2147483647),
+    msgFlags         OCTET STRING (SIZE(1)),
+    msgSecurityModel INTEGER (1..2147483647)
+}
+
+ScopedPduData ::= CHOICE {
+    plaintext    ScopedPDU,
+    encryptedPDU OCTET STRING
+}
+
+ScopedPDU ::= SEQUENCE {
+    contextEngineID SnmpEngineID,
+    contextName     OCTET STRING,
+    data            PDUs
+}
+
+-- RFC 3416 §3 — protocol data units (SNMPv2 operations; carried in SNMPv1/v2c/v3 messages)
+PDUs ::= CHOICE {
+    get-request      GetRequest-PDU,
+    get-next-request GetNextRequest-PDU,
+    get-response     GetResponse-PDU,
+    set-request      SetRequest-PDU,
+    trap             Trap-PDU,
+    getBulkRequest   GetBulkRequest-PDU,
+    informRequest    InformRequest-PDU,
+    snmpV2-trap      SNMPv2-Trap-PDU,
+    report           Report-PDU
+}
+
+GetRequest-PDU      ::= [0] IMPLICIT PDU
+GetNextRequest-PDU  ::= [1] IMPLICIT PDU
+GetResponse-PDU     ::= [2] IMPLICIT PDU
+SetRequest-PDU      ::= [3] IMPLICIT PDU
+GetBulkRequest-PDU  ::= [5] IMPLICIT BulkPDU
+InformRequest-PDU   ::= [6] IMPLICIT PDU
+SNMPv2-Trap-PDU     ::= [7] IMPLICIT PDU
+Report-PDU          ::= [8] IMPLICIT PDU
+
+PDU ::= SEQUENCE {
+    request-id INTEGER (-2147483648..2147483647),
+    error-status INTEGER {
+        noError(0),
+        tooBig(1),
+        noSuchName(2),
+        badValue(3),
+        readOnly(4),
+        genErr(5),
+        noAccess(6),
+        wrongType(7),
+        wrongLength(8),
+        wrongEncoding(9),
+        wrongValue(10),
+        noCreation(11),
+        inconsistentValue(12),
+        resourceUnavailable(13),
+        commitFailed(14),
+        undoFailed(15),
+        authorizationError(16),
+        notWritable(17),
+        inconsistentName(18)
+    },
+    error-index INTEGER (0..max-bindings),
+    variable-bindings VarBindList
+}
+
+BulkPDU ::= SEQUENCE {
+    request-id      INTEGER (-2147483648..2147483647),
+    non-repeaters   INTEGER (0..max-bindings),
+    max-repetitions INTEGER (0..max-bindings),
+    variable-bindings VarBindList
+}
+
+max-bindings INTEGER ::= 2147483647
+
+-- RFC 1157 SNMPv1 Trap (distinct from SNMPv2 TRAP PDU); kept for Message.data CHOICE
+Trap-PDU ::= [4] IMPLICIT SEQUENCE {
+    enterprise      EnterpriseOID,
+    agent-addr      NetworkAddress,
+    generic-trap    INTEGER {
+        coldStart(0),
+        warmStart(1),
+        linkDown(2),
+        linkUp(3),
+        authenticationFailure(4),
+        egpNeighborLoss(5),
+        enterpriseSpecific(6)
+    },
+    specific-trap   INTEGER,
+    time-stamp      TimeTicks,
+    variable-bindings VarBindList
+}
+
+-- RFC 3416 §3 — variable bindings (second element named ``data`` for tooling; wire-compatible)
+VarBind ::= SEQUENCE {
+    name ObjectName,
+    data CHOICE {
+        value          ObjectSyntax,
+        unSpecified    NULL,
+        noSuchObject   [0] IMPLICIT NULL,
+        noSuchInstance [1] IMPLICIT NULL,
+        endOfMibView   [2] IMPLICIT NULL
+    }
+}
+
+VarBindList ::= SEQUENCE (SIZE (0..max-bindings)) OF VarBind
+
+-- SMUX (RFC 1227) — optional peer/agent framing
+SMUX-PDUs ::= CHOICE {
+    open             OpenPDU,
+    close            ClosePDU,
+    registerRequest  RReqPDU,
+    registerResponse RegisterResponse,
+    commitOrRollback SOutPDU
+}
+
+RegisterResponse ::= CHOICE {
+    rRspPDU RRspPDU,
+    pDUs    PDUs
+}
+
+OpenPDU ::= CHOICE {
+    smux-simple SimpleOpen
+}
+
+SimpleOpen ::= [APPLICATION 0] IMPLICIT SEQUENCE {
+    smux-version INTEGER { version-1(0) },
+    identity     OBJECT IDENTIFIER,
+    description  DisplayString,
+    password     OCTET STRING
+}
+
+DisplayString ::= OCTET STRING
+
+ClosePDU ::= [APPLICATION 1] IMPLICIT INTEGER {
+    goingDown(0),
+    unsupportedVersion(1),
+    packetFormat(2),
+    protocolError(3),
+    internalError(4),
+    authenticationFailure(5)
+}
+
+RReqPDU ::= [APPLICATION 2] IMPLICIT SEQUENCE {
+    subtree    ObjectName,
+    priority   INTEGER (-1..2147483647),
+    operation  INTEGER {
+        delete(0),
+        readOnly(1),
+        readWrite(2)
+    }
+}
+
+RRspPDU ::= [APPLICATION 3] IMPLICIT INTEGER { failure(-1) }
+SOutPDU ::= [APPLICATION 4] IMPLICIT INTEGER { commit(0), rollback(1) }
+
+END

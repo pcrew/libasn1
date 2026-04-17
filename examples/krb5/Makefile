@@ -9,6 +9,11 @@ all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) -rdynamic $(OBJECTS) -o $@
+
+run_example: $(PROGRAM)
+	@echo "== Kerberos == "
+	@./$(PROGRAM)
+
 clean:
 	@rm -rf $(PROGRAM)
 
