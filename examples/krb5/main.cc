@@ -8,9 +8,19 @@
 
 #include "libasn/common.h"
 #include "libasn/basic_reader.h"
-#include "libasn/protocols/kerberos.h"
+#include <libasn/protocols/kerberos/kerberos.h>
 
 using namespace std::literals;
+
+namespace {
+/* Raw Ticket SEQUENCE without APPLICATION [1] wrapper (see generated `ticket`). */
+constexpr auto ticket_sequence = libasn::der::sequence(
+    libasn::der::explicit_context_specific<0>(libasn::der::integer),
+    libasn::der::explicit_context_specific<1>(libasn::kerberos::realm),
+    libasn::der::explicit_context_specific<2>(libasn::kerberos::s_name),
+    libasn::der::explicit_context_specific<3>(libasn::kerberos::encrypted_ticket_data));
+}  // namespace
+
 int main() {
     {
         uint8_t packet_bytes[] = {
@@ -82,7 +92,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto ticket = libasn::k5::ticket.read(rd);
+        auto ticket = libasn::kerberos::ticket.read(rd);
         assert(ticket.has_value());
     }
     {
@@ -155,7 +165,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto ticket = libasn::k5::ticket_sequence.read(rd);
+        auto ticket = ticket_sequence.read(rd);
         assert(ticket.has_value());
     }
 
@@ -239,7 +249,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto ap_req = libasn::k5::ap_req.read(rd);
+        auto ap_req = libasn::kerberos::ap_req.read(rd);
         assert(ap_req.has_value());
     }
     {
@@ -262,7 +272,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto as_req = libasn::k5::as_req.read(rd);
+        auto as_req = libasn::kerberos::as_req.read(rd);
         assert(as_req.has_value());
 
         auto [pvno, msg_type, pa_data, req_body] = *as_req;
@@ -271,11 +281,11 @@ int main() {
         assert(pa_data.has_value());
 
         {
-            auto pa_data_context               = libasn::k5::pa_data.read(*pa_data);
+            auto pa_data_context               = libasn::kerberos::pa_data.read(*pa_data);
             auto [pa_data_type, pa_data_value] = *pa_data_context;
 
             assert(pa_data_type == 128);
-            auto data = libasn::k5::pac_request.read(pa_data_value);
+            auto data = libasn::kerberos::pa_pac_request.read(pa_data_value);
             assert(data.has_value());
             auto [include_pac] = *data;
             assert(include_pac == true);
@@ -292,7 +302,7 @@ int main() {
             auto [name_type, name_value] = *cname;
             assert(name_type == 1);
 
-            auto name_str = libasn::ber::general_string.read(name_value);
+            auto name_str = libasn::der::general_string.read(name_value);
             assert(name_str && name_str->view() == "administrator"sv);
             assert(name_value.size() == 0);
         }
@@ -303,11 +313,11 @@ int main() {
             auto [name_type, name_value] = *sname;
             assert(name_type == 2);
             {
-                auto name_str = libasn::ber::general_string.read(name_value);
+                auto name_str = libasn::der::general_string.read(name_value);
                 assert(name_str && name_str->view() == "krbtgt"sv);
             }
             {
-                auto name_str = libasn::ber::general_string.read(name_value);
+                auto name_str = libasn::der::general_string.read(name_value);
                 assert(name_str && name_str->view() == "vuan.kma.vn"sv);
             }
             assert(name_value.size() == 0);
@@ -318,7 +328,7 @@ int main() {
 
         assert(addresses.has_value());
         {
-            auto host_addresses       = libasn::k5::host_address.read(*addresses);
+            auto host_addresses       = libasn::kerberos::host_address.read(*addresses);
             auto [addr_type, address] = *host_addresses;
 
             assert(addr_type == 20);
@@ -341,7 +351,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto krb_error = libasn::k5::krb_error.read(rd);
+        auto krb_error = libasn::kerberos::krb_error.read(rd);
         assert(krb_error.has_value());
     }
 
@@ -369,7 +379,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto as_req = libasn::k5::as_req.read(rd);
+        auto as_req = libasn::kerberos::as_req.read(rd);
         assert(as_req.has_value());
     }
 
@@ -466,7 +476,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto as_rep = libasn::k5::as_rep.read(rd);
+        auto as_rep = libasn::kerberos::as_rep.read(rd);
         assert(as_rep.has_value());
     }
 
@@ -566,7 +576,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto tgs_req = libasn::k5::tgs_req.read(rd);
+        auto tgs_req = libasn::kerberos::tgs_req.read(rd);
         assert(tgs_req.has_value());
 
         auto [pvno, msg_type, pa_data, req_body] = *tgs_req;
@@ -575,11 +585,11 @@ int main() {
 
         assert(pa_data.has_value());
         {
-            auto pa_data_context               = libasn::k5::pa_data.read(*pa_data);
+            auto pa_data_context               = libasn::kerberos::pa_data.read(*pa_data);
             auto [pa_data_type, pa_data_value] = *pa_data_context;
 
             assert(pa_data_type == 1);
-            auto ap_req = libasn::k5::ap_req.read(pa_data_value);
+            auto ap_req = libasn::kerberos::ap_req.read(pa_data_value);
             assert(ap_req.has_value());
 
             auto [ap_pvno, ap_msg_type, ap_options, ticket, enc_auth] = *ap_req;
@@ -693,7 +703,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto tgs_rep = libasn::k5::tgs_rep.read(rd);
+        auto tgs_rep = libasn::kerberos::tgs_rep.read(rd);
         assert(tgs_rep.has_value());
 
         auto [pvno, msg_type, pa_data, crealm, cname, ticket, enc_part] = *tgs_rep;
@@ -789,7 +799,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto tgs_req = libasn::k5::tgs_req.read(rd);
+        auto tgs_req = libasn::kerberos::tgs_req.read(rd);
         assert(tgs_req.has_value());
     }
 
@@ -883,7 +893,7 @@ int main() {
             std::string_view{reinterpret_cast<const char *>(packet_bytes), std::size(packet_bytes)}
         };
 
-        auto tgs_rep = libasn::k5::tgs_rep.read(rd);
+        auto tgs_rep = libasn::kerberos::tgs_rep.read(rd);
         assert(tgs_rep.has_value());
     }
 }

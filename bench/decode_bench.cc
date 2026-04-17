@@ -11,9 +11,9 @@
 #include <string_view>
 #include <vector>
 
-#include "libasn/ber.h"
 #include "libasn/basic_reader.h"
-#include "libasn/protocols/ldap.h"
+#include "libasn/ber.h"
+#include <libasn/protocols/ldap/ldap.h>
 
 namespace {
 
@@ -37,9 +37,13 @@ bool load_fixture(const char *path) {
 }
 
 [[gnu::noinline]] std::uint64_t libasn_full_decode_digest(std::string_view sv) {
-    using libasn::ldap::protocol_op_enum;
+    /* protocol_op is choice<int> with APPLICATION tag numbers as discriminants. */
+    constexpr int k_search_result_entry = 4;
+    constexpr auto partial_attribute    = libasn::ber::sequence(
+        libasn::ldap::attribute_description, libasn::ber::set_of(libasn::ldap::attribute_value));
+
     basic_reader rd{sv};
-    auto         msg = libasn::ldap::message.read(rd);
+    auto         msg = libasn::ldap::ldap_message.read(rd);
     if (unlikely(!msg.has_value() || !rd.empty())) {
         return 0;
     }
@@ -47,18 +51,18 @@ bool load_fixture(const char *path) {
     (void)message_id;
     (void)controls;
 
-    if (unlikely(command.tag_number != protocol_op_enum::SEARCH_RESULT_ENTRY)) {
+    if (unlikely(command.tag_number != k_search_result_entry)) {
         return 0;
     }
 
-    auto [dn, attrs] = command.get<protocol_op_enum::SEARCH_RESULT_ENTRY>();
+    auto [dn, attrs] = command.get<k_search_result_entry>();
     (void)dn;
 
     std::uint64_t ret = 0;
     basic_reader  ar{attrs.view()};
 
     while (!ar.empty()) {
-        auto pa = libasn::ldap::partial_attribute.read(ar);
+        auto pa = partial_attribute.read(ar);
         if (unlikely(!pa.has_value())) {
             return 0;
         }
@@ -81,7 +85,7 @@ static std::vector<std::uint8_t> g_copy_buf;
 void BM_libasn_pdu_header_only(benchmark::State &state) {
     for (auto _ : state) {
         basic_reader rd{g_view};
-        auto         msg = libasn::ldap::message.read(rd);
+        auto         msg = libasn::ldap::ldap_message.read(rd);
         if (!msg.has_value() || !rd.empty()) {
             state.SkipWithError("decode failed or trailing bytes");
             break;

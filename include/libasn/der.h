@@ -57,6 +57,12 @@ constexpr auto sequence(ElementsType &&...elements) {
     return codec::sequence(std::forward<ElementsType>(elements)...);
 }
 
+/** Same as :func:`ber::sequence_contents` — field encodings without outer SEQUENCE TLV (IMPLICIT tagging). */
+template <typename... ElementsType>
+constexpr auto sequence_contents(ElementsType &&...elements) {
+    return libasn::internal::sequence_type<std::decay_t<ElementsType>...>(std::forward<ElementsType>(elements)...);
+}
+
 template <typename T>
 constexpr auto sequence_of(T &&t) {
     return codec::sequence_of(std::forward<T>(t));

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <netinet/in.h>
 
-#include "libasn/protocols/iec61850.h"
+#include <libasn/protocols/iec61850/mms/mms.h>
 #include "libasn/basic_reader.h"
 
 using namespace std::literals;
