@@ -69,5 +69,26 @@ constexpr auto set_of(T &&t) {
     return codec::set_of(std::forward<T>(t));
 }
 
+template <auto tag_number, typename T>
+constexpr auto explicit_context_specific(T &&type) {
+    return typename codec::template common_type<
+        static_identifier<encoding_enum::CONSTRUCTED, tag_class_enum::CONTEXT_SPECIFIC, tag_number,
+                          encoding_rules_enum::BER>,
+        std::decay_t<T>>(static_identifier<encoding_enum::CONSTRUCTED, tag_class_enum::CONTEXT_SPECIFIC, tag_number,
+                                           encoding_rules_enum::BER>{},
+                         std::forward<T>(type));
+}
+
+template <auto tag_number, typename T>
+constexpr auto explicit_application(T &&type) {
+    return
+        typename codec::template common_type<static_identifier<encoding_enum::CONSTRUCTED, tag_class_enum::APPLICATION,
+                                                               tag_number, encoding_rules_enum::BER>,
+                                             std::decay_t<T>>(
+            static_identifier<encoding_enum::CONSTRUCTED, tag_class_enum::APPLICATION, tag_number,
+                              encoding_rules_enum::BER>{},
+            std::forward<T>(type));
+}
+
 } // namespace ber
 } // namespace libasn

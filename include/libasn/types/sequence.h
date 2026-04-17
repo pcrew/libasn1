@@ -10,6 +10,8 @@ template <typename... Types>
 struct sequence_type {
     std::tuple<Types...> types;
 
+    constexpr sequence_type() = default;
+
     template <typename... Ts>
     explicit constexpr sequence_type(Ts &&...types)
         : types(std::forward<Ts>(types)...) {}
